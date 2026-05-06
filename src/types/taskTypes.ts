@@ -1,7 +1,7 @@
-export type todoStatusType = 'completed' | 'scheduled' | 'inprogress';
+export type statusType = 'completed' | 'scheduled' | 'inprogress';
 
-export interface todoObj {
+export interface taskObj {
 	id: string;
-	todoTitle: string;
-	todoStatus: todoStatusType | '';
+	description: string;
+	status: statusType | '';
 }

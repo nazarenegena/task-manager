@@ -1,20 +1,19 @@
 <script lang="ts">
 	import Button from './button.svelte';
-	import type { todoObj, todoStatusType } from '../types/taskTypes';
+	import type { taskObj, statusType } from '../types/taskTypes';
 	import { addTask, getTasks, deleteTask, editTask } from '../utils/tasks.svelte';
 	import StatusCard from './statusCard.svelte';
 
 	let todo: string = $state('');
-	let status: todoStatusType | '' = $state('');
-	let tasks = getTasks();
+	let status: statusType | '' = $state('');
 	let editingId = $state<string | null>(null);
-	let completedTasks = $derived(tasks.filter((t) => t?.todoStatus === 'completed').length);
-	let scheduledTasks = $derived(tasks.filter((t) => t?.todoStatus === 'scheduled').length);
-	let inprogress = $derived(tasks.filter((t) => t?.todoStatus === 'inprogress').length);
-
-	const updateTaskStatus = (id: string, newStatus: todoStatusType) => {
+	const tasks = getTasks();
+	const completedTasks = $derived(tasks.filter((t) => t?.status === 'completed').length);
+	const scheduledTasks = $derived(tasks.filter((t) => t?.status === 'scheduled').length);
+	const inprogress = $derived(tasks.filter((t) => t?.status === 'inprogress').length);
+	const updateTaskStatus = (id: string, newStatus: statusType) => {
 		const task = tasks?.find((t) => t?.id === id);
-		if (task) task.todoStatus = newStatus;
+		if (task) task.status = newStatus;
 	};
 
 	const handleAdd = () => {
@@ -30,17 +29,14 @@
 		status = '';
 	};
 
-	const startEdit = (task: todoObj) => {
+	const startEdit = (task: taskObj) => {
 		editingId = task.id;
-		todo = task.todoTitle;
+		todo = task.description;
 	};
 </script>
 
 <header>
 	<h1>Todo's</h1>
-	<h1>Fix the add todo reusbility</h1>
-
-	<h2>Fix the UI</h2>
 </header>
 
 <main>
@@ -66,8 +62,8 @@
 	<div>
 		{#each tasks as task (task?.id)}
 			<div>
-				<div class={task.todoStatus === 'completed' ? 'line-through' : ''}>
-					{task?.todoTitle}
+				<div class={task.status === 'completed' ? 'line-through' : ''}>
+					{task?.description}
 				</div>
 				<Button
 					onclick={() => startEdit(task)}
@@ -78,7 +74,7 @@
 					<Button
 						onclick={() => updateTaskStatus(task?.id, s)}
 						btnStatus={s}
-						className={task?.todoStatus === s ? 'bg-teal-600 border-teal-600 text-white' : ''}
+						className={task?.status === s ? 'bg-teal-600 border-teal-600 text-white' : ''}
 					/>
 				{/each}
 				<Button
