@@ -1,23 +1,21 @@
-import type { todoObj, todoStatusType } from '../types/taskTypes';
+import type { taskObj, statusType } from '../types/taskTypes';
 
-const tasks = $state<todoObj[]>([]);
+const tasks = $state<taskObj[]>([]);
 export function getTasks() {
-	console.log(tasks, 'tasks');
 	return tasks;
 }
 
-export const addTask = (todo: string, status: todoStatusType | '') => {
+export const addTask = (task: string, status: statusType | '') => {
 	tasks?.push({
 		id: crypto.randomUUID(),
-		todoTitle: todo,
-		todoStatus: status
+		description: task,
+		status: status
 	});
 };
 
 export const editTask = (id: string, newTitle: string) => {
 	const task = tasks?.find((t) => t.id === id);
-	if (task) task.todoTitle = newTitle;
-	console.log('edittodo', task);
+	if (task) task.description = newTitle;
 	return task;
 };
 
