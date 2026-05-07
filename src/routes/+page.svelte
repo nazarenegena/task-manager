@@ -1,7 +1,5 @@
 <script>
-	import MainContent from '../components/mainContent.svelte';
+	import TaskList from '../components/taskList.svelte';
 </script>
 
-<div>
-	<MainContent />
-</div>
+<TaskList />
