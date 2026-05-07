@@ -6,6 +6,6 @@
 	let { taskCount, statusTitle }: statusCardProps = $props();
 </script>
 
-<div>
+<div class="">
 	<p>{statusTitle} {taskCount}</p>
 </div>
