@@ -3,6 +3,7 @@
 	import StatusCard from '../elements/statusCard.svelte';
 	import Button from './../elements/button.svelte';
 	import type { taskObj, statusType } from '../../types/taskTypes';
+	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import { addTask, getTasks, deleteTask, editTask } from '../../utils/tasks.svelte';
 
 	// functionality
@@ -37,20 +38,23 @@
 	};
 </script>
 
-<header>
-	<h1>Dashboard</h1>
-	<h3>Manage your tasks and stay productive</h3>
-</header>
+<div class="flex items-center space-x-4">
+	<LayoutDashboard class="text h-10 w-10 rounded-lg bg-lime-accent/15 p-2 text-lime-accent" />
+	<div>
+		<h1 class="text-2xl font-bold">Dashboard</h1>
+		<h3 class="text-primary/60">Manage your tasks and stay productive</h3>
+	</div>
+</div>
 
 <main>
 	<main class="my-20">
 		<div>
-			<div class="grid grid-cols-3 gap-4">
+			<div class="flex space-x-10">
 				<StatusCard statusTitle="Completed" taskCount={completedTasks} />
 				<StatusCard statusTitle="Scheduled" taskCount={scheduledTasks} />
 				<StatusCard statusTitle="Inprogress" taskCount={inprogress} />
 			</div>
-			<div class="flex">
+			<div class="my-10 flex">
 				<input
 					type="text"
 					bind:value={todo}
@@ -59,7 +63,7 @@
 				<Button
 					onclick={handleAdd}
 					btnStatus={editingId ? 'Save' : 'Add'}
-					className="w-32 my-4 bg-teal-600 text-white"
+					className="w-32 my-4 bg-primary text-secondary"
 				/>
 			</div>
 		</div>
@@ -72,19 +76,19 @@
 					<Button
 						onclick={() => startEdit(task)}
 						btnStatus="Edit"
-						className="bg-teal-600 border-teal-600 text-white"
+						className="border-gray-400 text-primary"
 					/>
 					{#each ['completed', 'inprogress', 'scheduled'] as const as s (s)}
 						<Button
 							onclick={() => updateTaskStatus(task?.id, s)}
 							btnStatus={s}
-							className={task?.status === s ? 'bg-teal-600 border-teal-600 text-white' : ''}
+							className={task?.status === s ? 'bg-lime-accent text-primary' : ''}
 						/>
 					{/each}
 					<Button
 						onclick={() => deleteTask(task?.id)}
 						btnStatus="Delete"
-						className="w-32 my-4 bg-teal-600 text-white"
+						className="w-32 my-4 bg-red-600 text-secondary"
 					/>
 					<Button
 						onclick={() => {
@@ -92,7 +96,7 @@
 							todo = '';
 						}}
 						btnStatus="Cancel"
-						className="w-32 my-4 bg-red-600 text-white"
+						className="w-32 my-4 bg-red-600 text-secondary"
 					/>
 				</div>
 			{:else}

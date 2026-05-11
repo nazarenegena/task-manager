@@ -12,11 +12,5 @@
 		"strict": true,
 		"moduleResolution": "bundler"
 	},
-	"include": [
-		"src/**/*.svelte",
-		"src/**/*.svelte.ts",
-		"src/**/*.svelte.js",
-		"src/**/*.ts",
-		"src/**/*.js"
-	]
+
 }

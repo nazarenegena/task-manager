@@ -10,7 +10,7 @@
 
 <button
 	{onclick}
-	class={`${className} mx-2 cursor-pointer rounded-md border border-teal-600  p-2 text-teal-600`}
+	class={`${className} mx-2 cursor-pointer rounded-md border border-gray-300 p-2 text-gray-700`}
 >
 	{btnStatus}
 </button>
