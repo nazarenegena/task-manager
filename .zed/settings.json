@@ -3,13 +3,12 @@
 // 	"show_completions_on_input": false
 // }
 //
-
-{
-	"show_completions_on_input": false,
-	"show_edit_predictions": false,
-	"disable_ai": true,
-	"features": {
-		"inline_completion_provider": "none"
-	},
-	"use_autoclose": false
-}
+// {
+// 	"show_completions_on_input": false,
+// 	"show_edit_predictions": false,
+// 	"disable_ai": true,
+// 	"features": {
+// 		"inline_completion_provider": "none"
+// 	},
+// 	"use_autoclose": false
+// }
