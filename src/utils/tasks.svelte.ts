@@ -1,21 +1,39 @@
-import type { taskObj, statusType } from '../types/taskTypes';
+import type { taskObj, statusType, priorityType } from '../types/taskTypes';
 
 const tasks = $state<taskObj[]>([]);
 export function getTasks() {
 	return tasks;
 }
 
-export const addTask = (task: string, status: statusType | '') => {
+export const addTask = (
+	task: string,
+	status: statusType | '',
+	priority: priorityType | '',
+	todoCategory: string | '',
+	todoDescription: string | ''
+) => {
 	tasks?.push({
 		id: crypto.randomUUID(),
-		description: task,
-		status: status
+		title: task,
+		status: status,
+		priority: priority,
+		category: todoCategory,
+		description: todoDescription
 	});
 };
 
-export const editTask = (id: string, newTitle: string) => {
+export const editTask = (
+	id: string,
+	newTitle: string,
+	newPriority: priorityType | '',
+	newCategory: string | '',
+	newDescription: string | ''
+) => {
 	const task = tasks?.find((t) => t.id === id);
-	if (task) task.description = newTitle;
+	if (task) task.title = newTitle;
+	if (task) task.priority = newPriority;
+	if (task) task.category = newCategory;
+	if (task) task.description = newDescription;
 	return task;
 };
 
