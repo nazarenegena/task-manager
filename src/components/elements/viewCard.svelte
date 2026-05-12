@@ -1,8 +1,12 @@
 <script lang="ts">
+	// imports
+	import type { Component } from 'svelte';
+
 	interface viewCardProps {
 		viewCardTitle: string;
 		onclick: () => void;
 		className: string;
+		icon: Component<any>;
 	}
 
 	let { viewCardTitle, onclick, className, icon: Icon }: viewCardProps = $props();
