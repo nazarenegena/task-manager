@@ -16,24 +16,23 @@
 	const completedTasks = $derived(tasks.filter((t) => t?.status === 'completed').length);
 	const scheduledTasks = $derived(tasks.filter((t) => t?.status === 'scheduled').length);
 	const inprogress = $derived(tasks.filter((t) => t?.status === 'inprogress').length);
+	let highPriorities = $derived(tasks.filter((t) => t?.priority === 'high'));
 	let todo: string = $state('');
 	let todoDate: string = $state('');
 	let todoDescription: string = $state('');
-	let priority: priorityType | '' = $state('Low');
+	let priority: priorityType | '' = $state('');
 	let todoCategory: string = $state('');
 	let status: statusType | '' = $state('');
 	let editingId = $state<string | null>(null);
-
-	let filteredPriorities = $derived(tasks.filter((t) => t?.priority === priority));
 
 	const handleAdd = () => {
 		if (!todo?.trim()) return;
 
 		if (editingId) {
-			editTask(editingId, todo, priority, todoCategory, todoDescription);
+			editTask(editingId, todo, priority, todoCategory, todoDescription, todoDate);
 			editingId = null;
 		} else {
-			addTask(todo, status, priority, todoCategory, todoDescription);
+			addTask(todo, status, priority, todoCategory, todoDescription, todoDate);
 		}
 		todo = '';
 		status = '';
@@ -63,22 +62,30 @@
 <main class="my-20">
 	<div>
 		<div class="flex space-x-10">
-			<StatusCard statusTitle="Completed" taskCount={completedTasks} />
-			<StatusCard statusTitle="Scheduled" taskCount={scheduledTasks} />
-			<StatusCard statusTitle="Inprogress" taskCount={inprogress} />
+			<StatusCard statusTitle="Total Tasks" taskCount={tasks.length} />
+			<StatusCard statusTitle="Completed" taskCount={completedTasks} status="completed" />
+			<StatusCard statusTitle="Scheduled" taskCount={scheduledTasks} status="scheduled" />
+			<StatusCard statusTitle="Inprogress" taskCount={inprogress} status="inprogress" />
+			<StatusCard statusTitle="High Priority" taskCount={highPriorities.length} priority="high" />
 		</div>
-		<div class="my-10 flex">
+
+		<div
+			class="my-10 flex justify-between gap-x-8 rounded-md border border-primary/15 px-6 py-4 shadow-md"
+		>
 			<input
 				type="text"
 				bind:value={todo}
-				placeholder={editingId ? 'Edit task ...' : 'Enter your task'}
+				placeholder={editingId ? 'Edit task ...' : 'What needs to be done ?'}
+				class="w-full rounded-3xl border-none focus:ring-2 focus:ring-lime-accent focus:outline-none"
 			/>
-			<Button onclick={() => (openDropdown = !openDropdown)} btnStatus={ChevronDown} />
-			<Button
-				onclick={handleAdd}
-				btnStatus={editingId ? 'Save' : 'Add'}
-				className="w-32 my-4 bg-primary text-secondary"
-			/>
+			<div class="flex items-center justify-between gap-4">
+				<ChevronDown class=" cursor-pointer" onclick={() => (openDropdown = !openDropdown)} />
+				<Button
+					onclick={handleAdd}
+					btnStatus={editingId ? 'Save' : 'Add'}
+					className="px-10 bg-primary text-secondary text-center "
+				/>
+			</div>
 		</div>
 	</div>
 	<!-- Descriptiondrop down -->
@@ -96,31 +103,18 @@
 			</div>
 
 			<div class="flex items-center space-y-2 space-x-10">
-				<div class=" relative flex flex-col">
+				<div class="relative flex flex-col">
 					<p class="text-primary/70">Priority</p>
-					<Button
-						onclick={() => (priorityDropdown = !priorityDropdown)}
-						btnStatus={priority}
-						className="w-80 h-10  border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
-						icon={ChevronDown}
-					/>
-					{#if priorityDropdown}
-						<div
-							class="absolute top-12 right-0 flex flex-col gap-3 rounded-md border border-primary/10 bg-secondary px-2 py-4 shadow-md"
-						>
-							{#each ['low', 'medium', 'high'] as priotityItem (priotityItem)}
-								<label class="rounded-xl px-2 py-1 hover:bg-purple-accent/10">
-									<input
-										type="radio"
-										bind:group={priority}
-										value={priotityItem}
-										placeholder="Select priority ..."
-									/>
-									<span>{priotityItem}</span>
-								</label>
-							{/each}
-						</div>
-					{/if}
+
+					<select
+						bind:value={priority}
+						class="h-10 w-80 appearance-none rounded-md border-primary/15 px-4 py-1 focus:ring-1 focus:ring-lime-accent focus:outline-none"
+					>
+						<option value="">Select priority ...</option>
+						<option value="low">low</option>
+						<option value="medium">medium</option>
+						<option value="high">high</option>
+					</select>
 				</div>
 				<div>
 					<p class="text-primary/70">Due Date</p>
@@ -146,7 +140,7 @@
 	<div>
 		{#each tasks as task (task?.id)}
 			<div>
-				<div class={task.status === 'completed' ? 'line-through' : ''}>
+				<div class={task?.status === 'completed' ? 'line-through' : ''}>
 					{task?.title}
 				</div>
 				<Button

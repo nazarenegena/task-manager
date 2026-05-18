@@ -10,7 +10,8 @@ export const addTask = (
 	status: statusType | '',
 	priority: priorityType | '',
 	todoCategory: string | '',
-	todoDescription: string | ''
+	todoDescription: string | '',
+	todoDate: string | ''
 ) => {
 	tasks?.push({
 		id: crypto.randomUUID(),
@@ -18,8 +19,10 @@ export const addTask = (
 		status: status,
 		priority: priority,
 		category: todoCategory,
-		description: todoDescription
+		description: todoDescription,
+		date: todoDate
 	});
+	console.log(tasks, 'the tasks');
 };
 
 export const editTask = (
@@ -27,13 +30,15 @@ export const editTask = (
 	newTitle: string,
 	newPriority: priorityType | '',
 	newCategory: string | '',
-	newDescription: string | ''
+	newDescription: string | '',
+	newTodoDate: string | ''
 ) => {
 	const task = tasks?.find((t) => t.id === id);
 	if (task) task.title = newTitle;
 	if (task) task.priority = newPriority;
 	if (task) task.category = newCategory;
 	if (task) task.description = newDescription;
+	if (task) task.date = newTodoDate;
 	return task;
 };
 
