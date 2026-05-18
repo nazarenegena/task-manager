@@ -8,4 +8,5 @@ export interface taskObj {
 	category: string | '';
 	status: statusType | '';
 	priority: priorityType | '';
+	date: string | '';
 }
