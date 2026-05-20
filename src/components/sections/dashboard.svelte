@@ -6,6 +6,9 @@
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import { addTask, getTasks, deleteTask, editTask } from '../../utils/tasks.svelte';
+	import SquarePen from '@lucide/svelte/icons/square-pen';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
+	import Check from '@lucide/svelte/icons/check';
 
 	// functionality
 	const tasks = getTasks();
@@ -64,7 +67,7 @@
 		<div class="flex space-x-10">
 			<StatusCard statusTitle="Total Tasks" taskCount={tasks.length} />
 			<StatusCard statusTitle="Completed" taskCount={completedTasks} status="completed" />
-			<StatusCard statusTitle="Scheduled" taskCount={scheduledTasks} status="scheduled" />
+			<!-- <StatusCard statusTitle="Scheduled" taskCount={scheduledTasks} status="scheduled" /> -->
 			<StatusCard statusTitle="Inprogress" taskCount={inprogress} status="inprogress" />
 			<StatusCard statusTitle="High Priority" taskCount={highPriorities.length} priority="high" />
 		</div>
@@ -80,11 +83,27 @@
 			/>
 			<div class="flex items-center justify-between gap-4">
 				<ChevronDown class=" cursor-pointer" onclick={() => (openDropdown = !openDropdown)} />
-				<Button
-					onclick={handleAdd}
-					btnStatus={editingId ? 'Save' : 'Add'}
-					className="px-10 bg-primary text-secondary text-center "
-				/>
+				<div class="flex items-center gap-2">
+					{#if editingId}
+						<Button
+							onclick={() => {
+								editingId = null;
+								todo = '';
+								priority = '';
+								todoCategory = '';
+								todoDescription = '';
+								todoDate = '';
+							}}
+							btnStatus="Cancel"
+							className="px-6 bg-gray-200 text-gray-800"
+						/>
+					{/if}
+					<Button
+						onclick={handleAdd}
+						btnStatus={editingId ? 'Save' : 'Add'}
+						className="px-10 bg-primary text-secondary text-center"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -101,7 +120,6 @@
 					class="h-20 w-full rounded-lg border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
 				/>
 			</div>
-
 			<div class="flex items-center space-y-2 space-x-10">
 				<div class="relative flex flex-col">
 					<p class="text-primary/70">Priority</p>
@@ -137,40 +155,79 @@
 		</div>
 	{/if}
 
-	<div>
+	<div class="space-y-3">
 		{#each tasks as task (task?.id)}
-			<div>
-				<div class={task?.status === 'completed' ? 'line-through' : ''}>
-					{task?.title}
-				</div>
-				<Button
-					onclick={() => startEdit(task)}
-					btnStatus="Edit"
-					className="border-gray-400 text-primary"
-				/>
-				{#each ['completed', 'inprogress', 'scheduled'] as const as s (s)}
-					<Button
-						onclick={() => updateTaskStatus(task?.id, s)}
-						btnStatus={s}
-						className={task?.status === s ? 'bg-lime-accent text-primary' : ''}
+			<div class="flex items-center gap-3 rounded-xl border border-gray-200 p-4 shadow-sm">
+				<!-- Check circle toggle -->
+				{#if task.status === Check}
+					<button
+						onclick={() => updateTaskStatus(task.id, 'inprogress')}
+						aria-label="Mark as in progress"
+						class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-lime-accent"
+					>
+						<Check class="h-4 w-4 text-white" />
+					</button>
+				{:else}
+					<button
+						onclick={() => updateTaskStatus(task.id, Check)}
+						aria-label="Mark as completed"
+						class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-gray-300 hover:border-gray-500"
+					></button>
+				{/if}
+
+				<!-- Title or inline edit -->
+				{#if editingId === task.id}
+					<input
+						type="text"
+						bind:value={todo}
+						placeholder="Edit task..."
+						class="flex-1 rounded-md border border-primary/15 px-3 text-sm focus:ring-2 focus:ring-lime-accent focus:outline-none"
 					/>
-				{/each}
-				<Button
-					onclick={() => deleteTask(task?.id)}
-					btnStatus="Delete"
-					className="w-32 my-4 bg-red-600 text-secondary"
-				/>
-				<Button
-					onclick={() => {
-						editingId = null;
-						todo = '';
-					}}
-					btnStatus="Cancel"
-					className="w-32 my-4 bg-red-600 text-secondary"
-				/>
+				{:else}
+					<span
+						class={task.status === Check ? 'flex-1 text-gray-400 line-through' : 'flex-1 text-primary'}
+					>
+						{task.title}
+					</span>
+				{/if}
+
+				<!-- Status badge -->
+				{#if task.status === 'inprogress'}
+					<span
+						class="rounded-full bg-purple-accent/10 px-2.5 py-0.5 text-xs font-medium text-purple-accent"
+					>
+						In Progress
+					</span>
+				{:else if task.status === 'scheduled'}
+					<span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+						Scheduled
+					</span>
+				{:else if task.status === Check}
+					<span
+						class="rounded-full bg-lime-accent/10 px-2.5 py-0.5 text-xs font-medium text-lime-accent"
+					>
+						Completed
+					</span>
+				{/if}
+
+				<!-- Edit -->
+				<button
+					onclick={() => startEdit(task)}
+					class="cursor-pointer text-gray-400 hover:text-primary"
+				>
+					<SquarePen class="h-4 w-4" />
+				</button>
+
+				<!-- Delete -->
+				<button
+					onclick={() => deleteTask(task.id)}
+					class="cursor-pointer text-gray-400 hover:text-red-600"
+				>
+					<Trash2 class="h-4 w-4" />
+				</button>
 			</div>
 		{:else}
-			<p>No tasks found!</p>
+			<p class="text-gray-500">No tasks found!</p>
 		{/each}
 	</div>
 </main>
