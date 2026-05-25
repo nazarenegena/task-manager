@@ -1,57 +1,19 @@
 <script lang="ts">
-	// imports
 	import StatusCard from '../elements/statusCard.svelte';
 	import Button from './../elements/button.svelte';
-	import type { taskObj, statusType, priorityType } from '../../types/taskTypes';
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import { addTask, getTasks, deleteTask, editTask } from '../../utils/tasks.svelte';
 	import SquarePen from '@lucide/svelte/icons/square-pen';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import Check from '@lucide/svelte/icons/check';
+	import Play from '@lucide/svelte/icons/play';
+	import { taskStore } from '../../lib/taskStore.svelte';
 
-	// functionality
-	const tasks = getTasks();
-	const updateTaskStatus = (id: string, newStatus: statusType) => {
-		const task = tasks?.find((t) => t?.id === id);
-		if (task) task.status = newStatus;
+	const priorityColors: Record<string, string> = {
+		high: 'text-red-600',
+		medium: 'text-amber-600',
+		low: 'text-gray-400'
 	};
-	const completedTasks = $derived(tasks.filter((t) => t?.status === 'completed').length);
-	const scheduledTasks = $derived(tasks.filter((t) => t?.status === 'scheduled').length);
-	const inprogress = $derived(tasks.filter((t) => t?.status === 'inprogress').length);
-	let highPriorities = $derived(tasks.filter((t) => t?.priority === 'high'));
-	let todo: string = $state('');
-	let todoDate: string = $state('');
-	let todoDescription: string = $state('');
-	let priority: priorityType | '' = $state('');
-	let todoCategory: string = $state('');
-	let status: statusType | '' = $state('');
-	let editingId = $state<string | null>(null);
-
-	const handleAdd = () => {
-		if (!todo?.trim()) return;
-
-		if (editingId) {
-			editTask(editingId, todo, priority, todoCategory, todoDescription, todoDate);
-			editingId = null;
-		} else {
-			addTask(todo, status, priority, todoCategory, todoDescription, todoDate);
-		}
-		todo = '';
-		status = '';
-		priority = '';
-		todoCategory = '';
-		todoDescription = '';
-	};
-
-	const startEdit = (task: taskObj) => {
-		editingId = task.id;
-		todo = task.description;
-	};
-
-	// task dropdown
-	let priorityDropdown = $state(false);
-	let openDropdown = $state(false);
 </script>
 
 <div class="flex items-center space-x-4">
@@ -65,11 +27,19 @@
 <main class="my-20">
 	<div>
 		<div class="flex space-x-10">
-			<StatusCard statusTitle="Total Tasks" taskCount={tasks.length} />
-			<StatusCard statusTitle="Completed" taskCount={completedTasks} status="completed" />
+			<StatusCard statusTitle="Total Tasks" taskCount={taskStore.tasks.length} />
+			<StatusCard statusTitle="Completed" taskCount={taskStore.completedTasks} status="completed" />
 			<!-- <StatusCard statusTitle="Scheduled" taskCount={scheduledTasks} status="scheduled" /> -->
-			<StatusCard statusTitle="Inprogress" taskCount={inprogress} status="inprogress" />
-			<StatusCard statusTitle="High Priority" taskCount={highPriorities.length} priority="high" />
+			<StatusCard
+				statusTitle="Inprogress"
+				taskCount={taskStore.inprogressTasks}
+				status="inprogress"
+			/>
+			<StatusCard
+				statusTitle="High Priority"
+				taskCount={taskStore.highPriorityTasks}
+				priority="high"
+			/>
 		</div>
 
 		<div
@@ -77,30 +47,27 @@
 		>
 			<input
 				type="text"
-				bind:value={todo}
-				placeholder={editingId ? 'Edit task ...' : 'What needs to be done ?'}
+				bind:value={taskStore.todo}
+				placeholder={taskStore.editingId ? 'Edit task ...' : 'What needs to be done ?'}
 				class="w-full rounded-3xl border-none focus:ring-2 focus:ring-lime-accent focus:outline-none"
 			/>
 			<div class="flex items-center justify-between gap-4">
-				<ChevronDown class=" cursor-pointer" onclick={() => (openDropdown = !openDropdown)} />
+				<ChevronDown
+					class=" cursor-pointer"
+					onclick={() => (taskStore.openDropdown = !taskStore.openDropdown)}
+				/>
 				<div class="flex items-center gap-2">
-					{#if editingId}
+					{#if taskStore.editingId}
 						<Button
-							onclick={() => {
-								editingId = null;
-								todo = '';
-								priority = '';
-								todoCategory = '';
-								todoDescription = '';
-								todoDate = '';
-							}}
+							onclick={taskStore.cancelEdit}
 							btnStatus="Cancel"
 							className="px-6 bg-gray-200 text-gray-800"
 						/>
 					{/if}
+
 					<Button
-						onclick={handleAdd}
-						btnStatus={editingId ? 'Save' : 'Add'}
+						onclick={taskStore.handleAdd}
+						btnStatus={taskStore.editingId ? 'Save' : 'Add'}
 						className="px-10 bg-primary text-secondary text-center"
 					/>
 				</div>
@@ -109,13 +76,13 @@
 	</div>
 	<!-- Descriptiondrop down -->
 
-	{#if openDropdown}
+	{#if taskStore.openDropdown}
 		<div class=" my-6 space-y-10 rounded-md border border-primary/15 px-6 py-6 shadow-md">
 			<div class="space-y-4">
 				<p class="text-primary/70">Description</p>
 				<input
 					type="text"
-					bind:value={todoDescription}
+					bind:value={taskStore.todoDescription}
 					placeholder="Add more details about your task ..."
 					class="h-20 w-full rounded-lg border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
 				/>
@@ -125,7 +92,7 @@
 					<p class="text-primary/70">Priority</p>
 
 					<select
-						bind:value={priority}
+						bind:value={taskStore.priority}
 						class="h-10 w-80 appearance-none rounded-md border-primary/15 px-4 py-1 focus:ring-1 focus:ring-lime-accent focus:outline-none"
 					>
 						<option value="">Select priority ...</option>
@@ -138,7 +105,7 @@
 					<p class="text-primary/70">Due Date</p>
 					<input
 						type="date"
-						bind:value={todoDate}
+						bind:value={taskStore.todoDate}
 						class="h-10 w-80 rounded-md border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
 					/>
 				</div>
@@ -147,7 +114,7 @@
 				<p class="text-primary/70">Category</p>
 				<input
 					type="text"
-					bind:value={todoCategory}
+					bind:value={taskStore.todoCategory}
 					placeholder="e.g.., Work, Personal, Shopping"
 					class="h-10 w-full rounded-md border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
 				/>
@@ -156,75 +123,117 @@
 	{/if}
 
 	<div class="space-y-3">
-		{#each tasks as task (task?.id)}
-			<div class="flex items-center gap-3 rounded-xl border border-gray-200 p-4 shadow-sm">
-				<!-- Check circle toggle -->
-				{#if task.status === Check}
+		{#each taskStore.tasks as task (task?.id)}
+			<div class="rounded-xl border border-gray-200 p-4 shadow-sm">
+				<!-- Top row -->
+				<div class="flex items-center gap-3">
+					<!-- Check circle toggle -->
+					{#if task.status === 'completed'}
+						<button
+							onclick={() => taskStore.updateTaskStatus(task.id, 'inprogress')}
+							aria-label="Mark as in progress"
+							class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-lime-accent"
+						>
+							<Check class="h-4 w-4 text-white" />
+						</button>
+					{:else}
+						<button
+							onclick={() => taskStore.updateTaskStatus(task.id, 'completed')}
+							aria-label="Mark as completed"
+							class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-gray-300 hover:border-gray-500"
+						></button>
+					{/if}
+
+					<!-- Title or inline edit -->
+					{#if taskStore.editingId === task.id}
+						<input
+							type="text"
+							bind:value={taskStore.todo}
+							placeholder="Edit task..."
+							class="flex-1 rounded-md border border-primary/15 px-3 text-sm focus:ring-2 focus:ring-lime-accent focus:outline-none"
+						/>
+					{:else}
+						<span
+							class={task.status === 'completed'
+								? 'flex-1 text-gray-400 line-through'
+								: 'flex-1 text-primary'}
+						>
+							{task.title}
+						</span>
+					{/if}
+
+					<!-- Start Task button -->
 					<button
-						onclick={() => updateTaskStatus(task.id, 'inprogress')}
-						aria-label="Mark as in progress"
-						class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-lime-accent"
+						onclick={() => taskStore.updateTaskStatus(task.id, 'inprogress')}
+						aria-label="Start task"
+						class={task?.status === 'inprogress' || task?.status === 'completed'
+							? 'hidden'
+							: 'cursor-pointer text-lime-accent hover:text-lime-accent/80'}
 					>
-						<Check class="h-4 w-4 text-white" />
+						<Play class="h-4 w-4" />
 					</button>
-				{:else}
+
+					<!-- Status badge -->
+					{#if task.status === 'inprogress'}
+						<span
+							class="rounded-full bg-purple-accent/10 px-2.5 py-0.5 text-xs font-medium text-purple-accent"
+						>
+							In Progress
+						</span>
+					{:else if task.status === 'scheduled'}
+						<span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+							Scheduled
+						</span>
+					{:else if task.status === 'completed'}
+						<span
+							class="rounded-full bg-lime-accent/10 px-2.5 py-0.5 text-xs font-medium text-lime-accent"
+						>
+							Completed
+						</span>
+					{/if}
+
+					<!-- Edit -->
 					<button
-						onclick={() => updateTaskStatus(task.id, Check)}
-						aria-label="Mark as completed"
-						class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-gray-300 hover:border-gray-500"
-					></button>
-				{/if}
-
-				<!-- Title or inline edit -->
-				{#if editingId === task.id}
-					<input
-						type="text"
-						bind:value={todo}
-						placeholder="Edit task..."
-						class="flex-1 rounded-md border border-primary/15 px-3 text-sm focus:ring-2 focus:ring-lime-accent focus:outline-none"
-					/>
-				{:else}
-					<span
-						class={task.status === Check ? 'flex-1 text-gray-400 line-through' : 'flex-1 text-primary'}
+						onclick={() => taskStore.startEdit(task)}
+						class="cursor-pointer text-gray-400 hover:text-primary"
 					>
-						{task.title}
-					</span>
-				{/if}
+						<SquarePen class="h-4 w-4" />
+					</button>
 
-				<!-- Status badge -->
-				{#if task.status === 'inprogress'}
-					<span
-						class="rounded-full bg-purple-accent/10 px-2.5 py-0.5 text-xs font-medium text-purple-accent"
+					<!-- Delete -->
+					<button
+						onclick={() => taskStore.deleteTask(task.id)}
+						class="cursor-pointer text-gray-400 hover:text-red-600"
 					>
-						In Progress
-					</span>
-				{:else if task.status === 'scheduled'}
-					<span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-						Scheduled
-					</span>
-				{:else if task.status === Check}
-					<span
-						class="rounded-full bg-lime-accent/10 px-2.5 py-0.5 text-xs font-medium text-lime-accent"
+						<Trash2 class="h-4 w-4" />
+					</button>
+				</div>
+
+				<!-- Details rows -->
+				{#if task.description || task.priority || task.category || task.date}
+					{#if task.description}
+						<p
+							class={`mt-1 ml-9 truncate text-sm ${task.status === 'completed' ? 'text-gray-400 line-through' : 'text-gray-500'}`}
+						>
+							{task.description}
+						</p>
+					{/if}
+					<div
+						class={`mt-0.5 ml-9 flex items-center gap-1.5 text-xs ${task.status === 'completed' ? 'text-gray-300' : 'text-gray-400'}`}
 					>
-						Completed
-					</span>
+						{#if task.priority}
+							<span class="capitalize {priorityColors[task.priority]}">{task.priority}</span>
+						{/if}
+						{#if task.category}
+							{#if task.priority}<span>•</span>{/if}
+							<span>{task.category}</span>
+						{/if}
+						{#if task.date}
+							{#if task.priority || task.category}<span>•</span>{/if}
+							<span>{task.date}</span>
+						{/if}
+					</div>
 				{/if}
-
-				<!-- Edit -->
-				<button
-					onclick={() => startEdit(task)}
-					class="cursor-pointer text-gray-400 hover:text-primary"
-				>
-					<SquarePen class="h-4 w-4" />
-				</button>
-
-				<!-- Delete -->
-				<button
-					onclick={() => deleteTask(task.id)}
-					class="cursor-pointer text-gray-400 hover:text-red-600"
-				>
-					<Trash2 class="h-4 w-4" />
-				</button>
 			</div>
 		{:else}
 			<p class="text-gray-500">No tasks found!</p>
