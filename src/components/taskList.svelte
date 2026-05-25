@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Component } from 'svelte';
 	import type { viewType } from '../types/viewTypes';
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import ListTodo from '@lucide/svelte/icons/list-todo';
