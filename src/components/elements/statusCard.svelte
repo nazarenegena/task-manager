@@ -24,7 +24,9 @@
 		default: { text: 'text-black', bg: 'bg-white', border: 'border-gray-200' }
 	};
 	let colorClass = $derived(
-		(statusColor[status as string] || statusColor[priority as string]) ?? statusColor.default
+		(status ? statusColor[status] : undefined) ??
+			(priority ? statusColor[priority] : undefined) ??
+			statusColor.default
 	);
 </script>
 

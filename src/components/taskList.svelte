@@ -24,12 +24,12 @@
 
 <main class="py-10">
 	<div class="mb-6 flex justify-around rounded-xl bg-primary/5 p-3">
-		{#each views as view (view.id)}
+		{#each views as view (view?.id)}
 			<ViewCard
 				icon={view.icon}
 				onclick={() => (activeView = view?.id)}
 				viewCardTitle={view.label}
-				className={activeView === view.id ? 'rounded-xl bg-secondary shadow-md text-primary' : ''}
+				className={activeView === view?.id ? 'rounded-xl bg-secondary shadow-md text-primary' : ''}
 			/>
 		{/each}
 	</div>
