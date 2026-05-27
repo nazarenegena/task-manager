@@ -16,6 +16,7 @@ class TaskStore {
 	// ── Derived counts ──
 	completedTasks = $derived(this.tasks.filter((t) => t.status === 'completed').length);
 	inprogressTasks = $derived(this.tasks.filter((t) => t.status === 'inprogress').length);
+	pendingTasks = $derived(this.tasks.filter((t) => t.status !== 'completed').length);
 	highPriorityTasks = $derived(this.tasks.filter((t) => t.priority === 'high').length);
 
 	// ── CRUD ──
@@ -81,7 +82,14 @@ class TaskStore {
 			);
 			this.editingId = null;
 		} else {
-			this.addTask(this.todo, '', this.priority, this.todoCategory, this.todoDescription, this.todoDate);
+			this.addTask(
+				this.todo,
+				'',
+				this.priority,
+				this.todoCategory,
+				this.todoDescription,
+				this.todoDate
+			);
 		}
 		this.reset();
 	};

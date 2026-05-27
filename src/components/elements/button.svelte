@@ -14,7 +14,7 @@
 
 <button
 	{onclick}
-	class={`${className}  mx-2 flex cursor-pointer items-center justify-between rounded-md border border-gray-300 p-2 text-gray-700`}
+	class={`${className} flex cursor-pointer items-center justify-between gap-2 rounded-md p-2 text-gray-700 transition-colors`}
 >
 	{#if typeof BtnStatus === 'string'}
 		{BtnStatus}
