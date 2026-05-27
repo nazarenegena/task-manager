@@ -1,4 +1,5 @@
 <script lang="ts">
+	import StatusCard from '../elements/statusCard.svelte';
 	import TaskCard from '../elements/taskCard.svelte';
 	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import { taskStore } from '../../lib/taskStore.svelte';
@@ -13,9 +14,24 @@
 	</div>
 </div>
 
-<main class="my-20">
+<main class="my-10">
+	<div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
+		<StatusCard statusTitle="Total Tasks" taskCount={taskStore.tasks.length} />
+		<StatusCard statusTitle="Completed" taskCount={taskStore.completedTasks} status="completed" />
+		<StatusCard
+			statusTitle="Inprogress"
+			taskCount={taskStore.inprogressTasks}
+			status="inprogress"
+		/>
+		<StatusCard
+			statusTitle="High Priority"
+			taskCount={taskStore.highPriorityTasks}
+			priority="high"
+		/>
+	</div>
+
 	<TaskForm />
-	<div class="space-y-3">
+	<div class="space-y-5">
 		<p class="text-lg font-bold text-primary/70">Your Tasks</p>
 
 		{#each taskStore?.tasks as task (task?.id)}

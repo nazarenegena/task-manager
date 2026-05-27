@@ -11,7 +11,7 @@
 	let statusColor: Record<string, { text: string; bg: string; border: string }> = {
 		completed: {
 			text: 'text-lime-accent',
-			bg: 'bg-lime-accent/10',
+			bg: 'bg-lime-accent/5',
 			border: 'border-lime-accent/80'
 		},
 		inprogress: {
@@ -20,8 +20,9 @@
 			border: 'border-purple-accent/40'
 		},
 		scheduled: { text: 'text-gray-600', bg: 'bg-gray-100', border: 'border-gray-300' },
+		pending: { text: 'text-amber-600', bg: 'bg-amber-100/5', border: 'border-amber-300' },
 		high: { text: 'text-red-600', bg: 'bg-red-50', border: 'border-red-300' },
-		default: { text: 'text-black', bg: 'bg-white', border: 'border-gray-200' }
+		default: { text: 'text-black', bg: 'bg-white', border: 'border-gray-300' }
 	};
 	let colorClass = $derived(
 		(status ? statusColor[status] : undefined) ??
@@ -31,9 +32,9 @@
 </script>
 
 <div
-	class={`h-24 w-48 rounded-xl border border-primary/15 p-4 shadow-md ${colorClass.bg} ${colorClass.border}`}
+	class={`min-w-32 space-y-1 rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-lg ${colorClass.bg} ${colorClass.border}`}
 >
-	<p class={`${colorClass.text} text-3xl font-semibold`}>{taskCount}</p>
+	<p class={`${colorClass.text} text-4xl font-bold`}>{taskCount}</p>
 
-	<p class="text-primary/70">{statusTitle}</p>
+	<p class="truncate text-sm font-medium text-primary/50">{statusTitle}</p>
 </div>

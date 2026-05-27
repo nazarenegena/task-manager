@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { taskStore } from '$lib/taskStore.svelte';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import { slide } from 'svelte/transition';
 	import Button from './button.svelte';
 </script>
 
@@ -15,7 +16,7 @@
 	/>
 	<div class="flex items-center justify-between gap-4">
 		<ChevronDown
-			class=" cursor-pointer"
+			class="cursor-pointer transition-transform duration-200 {taskStore.openDropdown ? 'rotate-180' : ''}"
 			onclick={() => (taskStore.openDropdown = !taskStore.openDropdown)}
 		/>
 		<div class="flex items-center gap-2">
@@ -37,7 +38,10 @@
 </div>
 
 {#if taskStore.openDropdown}
-	<div class=" my-6 space-y-10 rounded-md border border-primary/15 px-6 py-6 shadow-md">
+	<div
+		class="my-6 space-y-10 rounded-md border border-primary/15 px-6 py-6 shadow-md"
+		transition:slide={{ duration: 200 }}
+	>
 		<div class="space-y-4">
 			<p class="text-primary/70">Description</p>
 			<input

@@ -9,19 +9,21 @@
 	let { task }: { task: taskObj } = $props();
 
 	const priorityColors: Record<string, string> = {
-		high: 'text-red-600',
-		medium: 'text-amber-600',
-		low: 'text-gray-400'
+		high: 'text-red-800 bg-red-100 border-red-800',
+		medium: 'text-lime-accent bg-lime-accent/10 border-lime-400',
+		low: 'text-gray-400 bg-gray-100 border-gray-400'
 	};
 </script>
 
-<div class="rounded-xl border border-gray-200 p-4 shadow-sm">
+<div
+	class={`rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md ${task?.status === 'completed' ? 'border-lime-accent bg-lime-accent/5' : 'border-gray-200 bg-white'}`}
+>
 	<div class="flex items-center gap-3">
 		{#if task?.status === 'completed'}
 			<button
 				onclick={() => taskStore?.updateTaskStatus(task?.id, 'inprogress')}
 				aria-label="Mark as in progress"
-				class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-lime-accent"
+				class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-lime-accent transition-colors hover:bg-lime-accent/80"
 			>
 				<Check class="h-4 w-4 text-white" />
 			</button>
@@ -29,7 +31,7 @@
 			<button
 				onclick={() => taskStore?.updateTaskStatus(task?.id, 'completed')}
 				aria-label="Mark as completed"
-				class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-gray-300 hover:border-gray-500"
+				class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border-2 border-gray-300 transition-colors hover:border-gray-500"
 			></button>
 		{/if}
 
@@ -55,7 +57,7 @@
 			aria-label="Start task"
 			class={task?.status === 'inprogress' || task?.status === 'completed'
 				? 'hidden'
-				: 'cursor-pointer text-purple-accent hover:text-purple-accent/80'}
+				: 'cursor-pointer text-lime-accent hover:text-lime-accent/80'}
 		>
 			<Play class="h-4 w-4" />
 		</button>
@@ -80,14 +82,14 @@
 
 		<button
 			onclick={() => taskStore?.startEdit(task)}
-			class="cursor-pointer text-gray-400 hover:text-primary"
+			class="cursor-pointer text-gray-400 transition-colors hover:text-primary"
 		>
 			<SquarePen class="h-4 w-4" />
 		</button>
 
 		<button
 			onclick={() => taskStore.deleteTask(task?.id)}
-			class="cursor-pointer text-gray-400 hover:text-red-600"
+			class="cursor-pointer text-gray-400 transition-colors hover:text-red-600"
 		>
 			<Trash2 class="h-4 w-4" />
 		</button>
@@ -105,11 +107,15 @@
 			class={`mt-0.5 ml-9 flex items-center gap-1.5 text-xs ${task?.status === 'completed' ? 'text-gray-300' : 'text-gray-400'}`}
 		>
 			{#if task?.priority}
-				<span class="capitalize {priorityColors[task?.priority ?? '']}">{task?.priority}</span>
+				<span
+					class="rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize {priorityColors[
+						task?.priority ?? ''
+					]}">{task?.priority}</span
+				>
 			{/if}
 			{#if task?.category}
 				{#if task?.priority}<span>•</span>{/if}
-				<span>{task?.category}</span>
+				<span class="">{task?.category}</span>
 			{/if}
 			{#if task?.date}
 				{#if task?.priority || task?.category}<span>•</span>{/if}

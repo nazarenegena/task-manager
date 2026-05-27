@@ -8,6 +8,7 @@
 	import Dashboard from './sections/dashboard.svelte';
 	import TaskView from './sections/taskView.svelte';
 	import Calender from './sections/calender.svelte';
+	import { fade } from 'svelte/transition';
 
 	let activeView = $state<viewType>('dashboard');
 	const views: { id: viewType; label: string; icon: Component<any> }[] = [
@@ -35,11 +36,17 @@
 	</div>
 	<div>
 		{#if activeView === 'dashboard'}
-			<Dashboard />
+			<div transition:fade={{ duration: 150 }}>
+				<Dashboard />
+			</div>
 		{:else if activeView === 'calender'}
-			<Calender />
+			<div transition:fade={{ duration: 150 }}>
+				<Calender />
+			</div>
 		{:else}
-			<TaskView />
+			<div transition:fade={{ duration: 150 }}>
+				<TaskView />
+			</div>
 		{/if}
 	</div>
 </main>

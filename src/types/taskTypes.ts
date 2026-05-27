@@ -1,4 +1,4 @@
-export type statusType = 'completed' | 'scheduled' | 'inprogress';
+export type statusType = 'completed' | 'scheduled' | 'inprogress' | 'pending';
 export type priorityType = 'high' | 'medium' | 'low';
 
 export interface taskObj {
