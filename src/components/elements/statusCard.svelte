@@ -32,7 +32,7 @@
 </script>
 
 <div
-	class={`min-w-32 space-y-1 rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-lg ${colorClass.bg} ${colorClass.border}`}
+	class={`min-w-32 space-y-1 rounded-xl border p-4 shadow-sm ${colorClass.bg} ${colorClass.border}`}
 >
 	<p class={`${colorClass.text} text-4xl font-bold`}>{taskCount}</p>
 
