@@ -16,7 +16,9 @@
 	/>
 	<div class="flex items-center justify-between gap-4">
 		<ChevronDown
-			class="cursor-pointer transition-transform duration-200 {taskStore.openDropdown ? 'rotate-180' : ''}"
+			class="cursor-pointer transition-transform duration-200 {taskStore.openDropdown
+				? 'rotate-180'
+				: ''}"
 			onclick={() => (taskStore.openDropdown = !taskStore.openDropdown)}
 		/>
 		<div class="flex items-center gap-2">
@@ -51,7 +53,7 @@
 				class="h-20 w-full rounded-lg border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
 			/>
 		</div>
-		<div class="flex items-center space-y-2 space-x-10">
+		<div class="flex items-center space-y-2 space-x-5">
 			<div class="relative flex flex-col">
 				<p class="text-primary/70">Priority</p>
 
@@ -70,6 +72,22 @@
 				<input
 					type="date"
 					bind:value={taskStore.todoDate}
+					class="h-10 w-80 rounded-md border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
+				/>
+			</div>
+			<div>
+				<p class="text-primary/70">Start Time</p>
+				<input
+					type="time"
+					bind:value={taskStore.todoStartTime}
+					class="h-10 w-80 rounded-md border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
+				/>
+			</div>
+			<div>
+				<p class="text-primary/70">End Time</p>
+				<input
+					type="time"
+					bind:value={taskStore.todoEndTime}
 					class="h-10 w-80 rounded-md border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
 				/>
 			</div>

@@ -11,13 +11,23 @@ class TaskStore {
 	todoDescription = $state('');
 	priority = $state<priorityType | ''>('');
 	todoCategory = $state('');
-	todoDate = $state('');
+	todoDate = $state(new Date());
+	todoStartTime = $state('');
+	todoEndTime = $state('');
 
 	// ── Derived counts ──
-	completedTasks = $derived(this.tasks.filter((t) => t.status === 'completed').length);
-	inprogressTasks = $derived(this.tasks.filter((t) => t.status === 'inprogress').length);
-	pendingTasks = $derived(this.tasks.filter((t) => t.status !== 'completed').length);
-	highPriorityTasks = $derived(this.tasks.filter((t) => t.priority === 'high').length);
+	get completedTasks() {
+		return this.tasks.filter((t) => t.status === 'completed').length;
+	}
+	get inprogressTasks() {
+		return this.tasks.filter((t) => t.status === 'inprogress').length;
+	}
+	get pendingTasks() {
+		return this.tasks.filter((t) => t.status !== 'completed').length;
+	}
+	get highPriorityTasks() {
+		return this.tasks.filter((t) => t.priority === 'high').length;
+	}
 
 	// ── CRUD ──
 	addTask(
@@ -26,17 +36,22 @@ class TaskStore {
 		priority: priorityType | '',
 		category: string | '',
 		description: string | '',
-		date: string | ''
-	) {
-		this.tasks.push({
-			id: crypto.randomUUID(),
-			title,
-			status: status as statusType,
-			priority,
-			category,
-			description,
-			date
-		});
+		date: Date,
+		startTime: string | '',
+		endTime: string | ''
+  ) {
+    const newTask: taskObj = {
+      id: crypto.randomUUID(),
+      title,
+      status: status as statusType,
+      priority,
+      category,
+      description,
+      date,
+      startTime,
+      endTime
+    }
+    this.tasks = [...this.tasks, newTask];
 	}
 
 	editTask(
@@ -45,26 +60,35 @@ class TaskStore {
 		newPriority: priorityType | '',
 		newCategory: string | '',
 		newDescription: string | '',
-		newTodoDate: string | ''
+		newTodoDate: Date,
+		newStartTime: string | '',
+		newEndTime: string | ''
 	) {
-		const task = this.tasks.find((t) => t.id === id);
-		if (!task) return;
-		task.title = newTitle;
-		task.priority = newPriority;
-		task.category = newCategory;
-		task.description = newDescription;
-		task.date = newTodoDate;
+	this.tasks = this.tasks.map((t) =>
+				t.id === id
+					? {
+							...t,
+							title: newTitle,
+							priority: newPriority,
+							category: newCategory,
+							description: newDescription,
+							date: newTodoDate,
+							startTime: newStartTime,
+							endTime: newEndTime
+					  }
+					: t
+			);
 	}
 
 	deleteTask = (id: string) => {
-		const index = this.tasks.findIndex((t) => t.id === id);
-		if (index !== -1) this.tasks.splice(index, 1);
+		this.tasks = this.tasks.filter((t) => t.id !== id);
 	};
 
 	// ── Status toggle ──
 	updateTaskStatus = (id: string, newStatus: statusType) => {
-		const task = this.tasks.find((t) => t.id === id);
-		if (task) task.status = newStatus;
+		this.tasks = this.tasks.map((t) =>
+			t.id === id ? { ...t, status: newStatus } : t
+		);
 	};
 
 	// ── Save or add ──
@@ -78,7 +102,9 @@ class TaskStore {
 				this.priority,
 				this.todoCategory,
 				this.todoDescription,
-				this.todoDate
+				this.toDate(this.todoDate),
+				this.todoStartTime,
+				this.todoEndTime
 			);
 			this.editingId = null;
 		} else {
@@ -88,8 +114,11 @@ class TaskStore {
 				this.priority,
 				this.todoCategory,
 				this.todoDescription,
-				this.todoDate
+				this.toDate(this.todoDate),
+				this.todoStartTime,
+				this.todoEndTime
 			);
+			console.log(taskStore.tasks, 'the tasks');
 		}
 		this.reset();
 	};
@@ -101,7 +130,9 @@ class TaskStore {
 		this.todoDescription = task.description;
 		this.priority = task.priority;
 		this.todoCategory = task.category;
-		this.todoDate = task.date;
+		this.todoDate = this.toDate(task.date);
+		this.todoStartTime = task.startTime;
+		this.todoEndTime = task.endTime;
 		this.openDropdown = true;
 	};
 
@@ -117,8 +148,14 @@ class TaskStore {
 		this.todoDescription = '';
 		this.priority = '';
 		this.todoCategory = '';
-		this.todoDate = '';
+		this.todoDate = new Date();
+		this.todoStartTime = '';
+		this.todoEndTime = '';
 		this.openDropdown = false;
+	}
+
+	private toDate(v: Date | string): Date {
+		return v instanceof Date ? v : new Date(v);
 	}
 }
 
