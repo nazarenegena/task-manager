@@ -31,7 +31,7 @@
 			sorted.sort((a, b) => {
 				if (!a.date) return 1;
 				if (!b.date) return -1;
-				return sortDir === 'asc' ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+				return sortDir === 'asc' ? a.date.getTime() - b.date.getTime() : b.date.getTime() - a.date.getTime();
 			});
 		} else {
 			const rank: Record<string, number> = { high: 0, medium: 1, low: 2 };
@@ -78,7 +78,7 @@
 		</div>
 		<div class="space-y-4">
 			<div>
-				<p class="mb-2 text-xs font-medium uppercase tracking-wide text-primary/50">Status</p>
+				<p class="mb-2 text-xs font-medium tracking-wide text-primary/50 uppercase">Status</p>
 				<div class="flex flex-wrap gap-2">
 					<FilterButton
 						name="All"
@@ -112,7 +112,7 @@
 			</div>
 
 			<div>
-				<p class="mb-2 text-xs font-medium uppercase tracking-wide text-primary/50">Priority</p>
+				<p class="mb-2 text-xs font-medium tracking-wide text-primary/50 uppercase">Priority</p>
 				<div class="flex flex-wrap gap-2">
 					<FilterButton
 						name="All"
@@ -146,20 +146,28 @@
 			</div>
 
 			<div>
-				<p class="mb-2 text-xs font-medium uppercase tracking-wide text-primary/50">Sort By</p>
+				<p class="mb-2 text-xs font-medium tracking-wide text-primary/50 uppercase">Sort By</p>
 				<div class="flex flex-wrap gap-2">
 					<button
-						onclick={() => { sortBy = 'date'; sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }}
-						class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-150 select-none active:scale-95 {sortBy === 'date'
-							? 'bg-primary/10 border border-primary/20 text-primary shadow-sm'
+						onclick={() => {
+							sortBy = 'date';
+							sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+						}}
+						class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-150 select-none active:scale-95 {sortBy ===
+						'date'
+							? 'border border-primary/20 bg-primary/10 text-primary shadow-sm'
 							: 'text-gray-500 hover:text-gray-700'}"
 					>
 						Date {sortDir === 'asc' ? '↑' : '↓'}
 					</button>
 					<button
-						onclick={() => { sortBy = 'priority'; sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }}
-						class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-150 select-none active:scale-95 {sortBy === 'priority'
-							? 'bg-primary/10 border border-primary/20 text-primary shadow-sm'
+						onclick={() => {
+							sortBy = 'priority';
+							sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+						}}
+						class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-150 select-none active:scale-95 {sortBy ===
+						'priority'
+							? 'border border-primary/20 bg-primary/10 text-primary shadow-sm'
 							: 'text-gray-500 hover:text-gray-700'}"
 					>
 						Priority {sortDir === 'asc' ? '↑' : '↓'}
