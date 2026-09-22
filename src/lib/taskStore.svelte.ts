@@ -1,8 +1,39 @@
+import { browser } from '$app/environment';
 import type { taskObj, statusType, priorityType } from '../types/taskTypes';
+import { toISODate, fromISODate } from './dates';
+
+const STORAGE_KEY = 'tasks';
+
+function loadTasks(): taskObj[] {
+	if (!browser) return [];
+	try {
+		const raw = localStorage.getItem(STORAGE_KEY);
+		if (!raw) return [];
+		const parsed = JSON.parse(raw) as taskObj[];
+		return parsed.map((t) => ({
+			...t,
+			// migrate legacy 'pending' status to 'scheduled'
+			status: (t.status as string) === 'pending' ? 'scheduled' : t.status,
+			date: new Date(t.date)
+		}));
+	} catch {
+		return [];
+	}
+}
 
 class TaskStore {
 	// ── Task array ──
-	tasks = $state<taskObj[]>([]);
+	tasks = $state<taskObj[]>(loadTasks());
+
+	constructor() {
+		if (browser) {
+			$effect.root(() => {
+				$effect(() => {
+					localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks));
+				});
+			});
+		}
+	}
 
 	// ── Form state ──
 	editingId = $state<string | null>(null);
@@ -11,7 +42,7 @@ class TaskStore {
 	todoDescription = $state('');
 	priority = $state<priorityType | ''>('');
 	todoCategory = $state('');
-	todoDate = $state(new Date());
+	todoDate = $state('');
 	todoStartTime = $state('');
 	todoEndTime = $state('');
 
@@ -22,12 +53,14 @@ class TaskStore {
 	get inprogressTasks() {
 		return this.tasks.filter((t) => t.status === 'inprogress').length;
 	}
-	get pendingTasks() {
-		return this.tasks.filter((t) => t.status !== 'completed').length;
+	get scheduledTasks() {
+		return this.tasks.filter((t) => t.status !== 'inprogress' && t.status !== 'completed').length;
 	}
 	get highPriorityTasks() {
 		return this.tasks.filter((t) => t.priority === 'high').length;
 	}
+
+	getTask = (id: string) => this.tasks.find((t) => t.id === id);
 
 	// ── CRUD ──
 	addTask(
@@ -39,19 +72,20 @@ class TaskStore {
 		date: Date,
 		startTime: string | '',
 		endTime: string | ''
-  ) {
-    const newTask: taskObj = {
-      id: crypto.randomUUID(),
-      title,
-      status: status as statusType,
-      priority,
-      category,
-      description,
-      date,
-      startTime,
-      endTime
-    }
-    this.tasks = [...this.tasks, newTask];
+	): taskObj {
+		const newTask: taskObj = {
+			id: crypto.randomUUID(),
+			title,
+			status: status as statusType,
+			priority,
+			category,
+			description,
+			date,
+			startTime,
+			endTime
+		};
+		this.tasks = [...this.tasks, newTask];
+		return newTask;
 	}
 
 	editTask(
@@ -64,31 +98,53 @@ class TaskStore {
 		newStartTime: string | '',
 		newEndTime: string | ''
 	) {
-	this.tasks = this.tasks.map((t) =>
-				t.id === id
-					? {
-							...t,
-							title: newTitle,
-							priority: newPriority,
-							category: newCategory,
-							description: newDescription,
-							date: newTodoDate,
-							startTime: newStartTime,
-							endTime: newEndTime
-					  }
-					: t
-			);
+		this.tasks = this.tasks.map((t) =>
+			t.id === id
+				? {
+						...t,
+						title: newTitle,
+						priority: newPriority,
+						category: newCategory,
+						description: newDescription,
+						date: newTodoDate,
+						startTime: newStartTime,
+						endTime: newEndTime
+					}
+				: t
+		);
 	}
 
 	deleteTask = (id: string) => {
 		this.tasks = this.tasks.filter((t) => t.id !== id);
 	};
 
+	syncFromCalendar(
+		id: string,
+		patch: {
+			date: Date;
+			startTime?: string;
+			endTime?: string;
+			title?: string;
+			description?: string;
+		}
+	) {
+		this.tasks = this.tasks.map((t) =>
+			t.id === id
+				? {
+						...t,
+						date: patch.date,
+						startTime: patch.startTime ?? t.startTime,
+						endTime: patch.endTime ?? t.endTime,
+						title: patch.title ?? t.title,
+						description: patch.description ?? t.description
+					}
+				: t
+		);
+	}
+
 	// ── Status toggle ──
 	updateTaskStatus = (id: string, newStatus: statusType) => {
-		this.tasks = this.tasks.map((t) =>
-			t.id === id ? { ...t, status: newStatus } : t
-		);
+		this.tasks = this.tasks.map((t) => (t.id === id ? { ...t, status: newStatus } : t));
 	};
 
 	// ── Save or add ──
@@ -102,7 +158,7 @@ class TaskStore {
 				this.priority,
 				this.todoCategory,
 				this.todoDescription,
-				this.toDate(this.todoDate),
+				fromISODate(this.todoDate),
 				this.todoStartTime,
 				this.todoEndTime
 			);
@@ -110,15 +166,14 @@ class TaskStore {
 		} else {
 			this.addTask(
 				this.todo,
-				'',
+				'scheduled',
 				this.priority,
 				this.todoCategory,
 				this.todoDescription,
-				this.toDate(this.todoDate),
+				fromISODate(this.todoDate),
 				this.todoStartTime,
 				this.todoEndTime
 			);
-			console.log(taskStore.tasks, 'the tasks');
 		}
 		this.reset();
 	};
@@ -130,9 +185,17 @@ class TaskStore {
 		this.todoDescription = task.description;
 		this.priority = task.priority;
 		this.todoCategory = task.category;
-		this.todoDate = this.toDate(task.date);
+		this.todoDate = toISODate(task.date);
 		this.todoStartTime = task.startTime;
 		this.todoEndTime = task.endTime;
+		this.openDropdown = true;
+	};
+
+	// ── Open blank form prefilled with a date (calendar "+ New Task") ──
+	newTask = (date?: Date) => {
+		this.editingId = null;
+		this.reset();
+		this.todoDate = toISODate(date ?? new Date());
 		this.openDropdown = true;
 	};
 
@@ -148,14 +211,10 @@ class TaskStore {
 		this.todoDescription = '';
 		this.priority = '';
 		this.todoCategory = '';
-		this.todoDate = new Date();
+		this.todoDate = '';
 		this.todoStartTime = '';
 		this.todoEndTime = '';
 		this.openDropdown = false;
-	}
-
-	private toDate(v: Date | string): Date {
-		return v instanceof Date ? v : new Date(v);
 	}
 }
 

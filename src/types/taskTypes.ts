@@ -1,4 +1,4 @@
-export type statusType = 'completed' | 'scheduled' | 'inprogress' | 'pending';
+export type statusType = 'completed' | 'scheduled' | 'inprogress';
 export type priorityType = 'high' | 'medium' | 'low';
 
 export interface taskObj {
@@ -8,7 +8,7 @@ export interface taskObj {
 	category: string | '';
 	status: statusType | '';
 	priority: priorityType | '';
-	date: Date,
+	date: Date;
 	startTime: string;
 	endTime: string;
 }
