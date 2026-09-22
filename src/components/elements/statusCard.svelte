@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { statusType, priorityType } from '../../types/taskTypes';
+	import { statusColors, priorityColors } from '$lib/priorityColors';
 
 	interface statusCardProps {
 		taskCount: number;
@@ -7,28 +8,14 @@
 		status?: statusType;
 		priority?: priorityType;
 	}
+
 	let { taskCount, statusTitle, status, priority }: statusCardProps = $props();
-	let statusColor: Record<string, { text: string; bg: string; border: string }> = {
-		completed: {
-			text: 'text-lime-accent',
-			bg: 'bg-lime-accent/5',
-			border: 'border-lime-accent/80'
-		},
-		inprogress: {
-			text: 'text-purple-accent',
-			bg: 'bg-purple-accent/5',
-			border: 'border-purple-accent/40'
-		},
-		scheduled: { text: 'text-gray-600', bg: 'bg-gray-100', border: 'border-gray-300' },
-		pending: { text: 'text-amber-600', bg: 'bg-amber-100/5', border: 'border-amber-300' },
-		high: { text: 'text-red-600', bg: 'bg-red-50', border: 'border-red-300' },
-		default: { text: 'text-black', bg: 'bg-white', border: 'border-gray-300' }
-	};
-	let colorClass = $derived(
-		(status ? statusColor[status] : undefined) ??
-			(priority ? statusColor[priority] : undefined) ??
-			statusColor.default
-	);
+
+	let colorClass = $derived.by(() => {
+		if (status && statusColors[status]) return statusColors[status];
+		if (priority && priorityColors[priority]) return priorityColors[priority];
+		return { text: 'text-black', bg: 'bg-white', border: 'border-gray-300' };
+	});
 </script>
 
 <div

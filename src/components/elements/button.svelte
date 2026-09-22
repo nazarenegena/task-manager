@@ -1,10 +1,12 @@
 <script lang="ts">
-	// imports
 	import type { Component } from 'svelte';
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	type AnyComponent = Component<any>;
+
 	interface BtnProps {
-		btnStatus: string | Component<any>;
-		icon?: Component<any>;
+		btnStatus: string | AnyComponent;
+		icon?: AnyComponent;
 		onclick?: () => void;
 		className?: string;
 	}
@@ -14,7 +16,7 @@
 
 <button
 	{onclick}
-	class={`${className} flex cursor-pointer items-center justify-between gap-2 rounded-md p-2 text-gray-700 transition-colors`}
+	class={`${className} flex cursor-pointer items-center justify-between gap-2 rounded-md transition-colors`}
 >
 	{#if typeof BtnStatus === 'string'}
 		{BtnStatus}

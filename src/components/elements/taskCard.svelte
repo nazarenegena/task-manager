@@ -4,15 +4,11 @@
 	import SquarePen from '@lucide/svelte/icons/square-pen';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import { taskStore } from '$lib/taskStore.svelte';
+	import { priorityColors } from '$lib/priorityColors';
+	import { formatDay } from '$lib/dates';
 	import type { taskObj } from '../../types/taskTypes';
 
 	let { task }: { task: taskObj } = $props();
-
-	const priorityColors: Record<string, string> = {
-		high: 'text-red-800 bg-red-100 border-red-800',
-		medium: 'text-lime-accent bg-lime-accent/10 border-lime-400',
-		low: 'text-gray-400 bg-gray-100 border-gray-400'
-	};
 </script>
 
 <div
@@ -110,7 +106,7 @@
 				<span
 					class="rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize {priorityColors[
 						task?.priority ?? ''
-					]}">{task?.priority}</span
+					]?.chip ?? priorityColors[''].chip}">{task?.priority}</span
 				>
 			{/if}
 			{#if task?.category}
@@ -119,7 +115,7 @@
 			{/if}
 			{#if task?.date}
 				{#if task?.priority || task?.category}<span>•</span>{/if}
-				<span>{task?.date}</span>
+				<span>{formatDay(task?.date)}</span>
 			{/if}
 		</div>
 	{/if}

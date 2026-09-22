@@ -5,8 +5,9 @@
 	import ListTodo from '@lucide/svelte/icons/list-todo';
 	import TaskCard from '../elements/taskCard.svelte';
 	import FilterButton from '../elements/filterButton.svelte';
+	import TaskForm from '../elements/taskForm.svelte';
 
-	let filterStatus = $state<'all' | 'completed' | 'inprogress' | 'pending'>('all');
+	let filterStatus = $state<'all' | 'completed' | 'inprogress' | 'scheduled'>('all');
 	let filterPriority = $state<'all' | 'high' | 'medium' | 'low'>('all');
 	let sortBy = $state<'date' | 'priority'>('date');
 	let sortDir = $state<'asc' | 'desc'>('asc');
@@ -14,8 +15,8 @@
 	let filteredByStatus = $derived(
 		filterStatus === 'all'
 			? taskStore.tasks
-			: filterStatus === 'pending'
-				? taskStore.tasks.filter((t) => t.status !== 'completed')
+			: filterStatus === 'scheduled'
+				? taskStore.tasks.filter((t) => t.status !== 'completed' && t.status !== 'inprogress')
 				: taskStore.tasks.filter((t) => t.status === filterStatus)
 	);
 
@@ -31,7 +32,9 @@
 			sorted.sort((a, b) => {
 				if (!a.date) return 1;
 				if (!b.date) return -1;
-				return sortDir === 'asc' ? a.date.getTime() - b.date.getTime() : b.date.getTime() - a.date.getTime();
+				return sortDir === 'asc'
+					? a.date.getTime() - b.date.getTime()
+					: b.date.getTime() - a.date.getTime();
 			});
 		} else {
 			const rank: Record<string, number> = { high: 0, medium: 1, low: 2 };
@@ -56,12 +59,16 @@
 <main class="my-10">
 	<div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
 		<StatusCard statusTitle="Total Tasks" taskCount={taskStore.tasks.length} />
-		<StatusCard statusTitle="Pending Tasks" taskCount={taskStore.pendingTasks} status="pending" />
+		<StatusCard
+			statusTitle="Scheduled Tasks"
+			taskCount={taskStore.scheduledTasks}
+			status="scheduled"
+		/>
 
 		<StatusCard statusTitle="Completed" taskCount={taskStore.completedTasks} status="completed" />
 
 		<StatusCard
-			statusTitle="Inprogress"
+			statusTitle="In Progress"
 			taskCount={taskStore.inprogressTasks}
 			status="inprogress"
 		/>
@@ -71,6 +78,7 @@
 			priority="high"
 		/>
 	</div>
+	<TaskForm />
 	<div class="my-6 rounded-xl border border-primary/15 p-5 shadow-sm">
 		<div class="mb-4 flex items-center gap-2">
 			<ListFilter class="h-5 w-5 text-primary/60" />
@@ -88,11 +96,11 @@
 						inactiveClass="bg-gray-100 text-gray-500 shadow-sm hover:-translate-y-0.5 hover:shadow-md"
 					/>
 					<FilterButton
-						name="Pending"
-						onclick={() => (filterStatus = 'pending')}
-						active={filterStatus === 'pending'}
-						activeClass="bg-amber-500 text-white shadow-md"
-						inactiveClass="bg-amber-50 text-amber-600 shadow-sm hover:-translate-y-0.5 hover:shadow-md"
+						name="Scheduled"
+						onclick={() => (filterStatus = 'scheduled')}
+						active={filterStatus === 'scheduled'}
+						activeClass="bg-gray-600 text-white shadow-md"
+						inactiveClass="bg-gray-100 text-gray-600 shadow-sm hover:-translate-y-0.5 hover:shadow-md"
 					/>
 					<FilterButton
 						name="In Progress"
@@ -132,15 +140,15 @@
 						name="Medium"
 						onclick={() => (filterPriority = 'medium')}
 						active={filterPriority === 'medium'}
-						activeClass="bg-amber-500 text-white shadow-md"
-						inactiveClass="bg-amber-50 text-amber-600 shadow-sm hover:-translate-y-0.5 hover:shadow-md"
+						activeClass="bg-lime-accent text-primary shadow-md"
+						inactiveClass="bg-lime-accent/10 text-lime-accent shadow-sm hover:-translate-y-0.5 hover:shadow-md"
 					/>
 					<FilterButton
 						name="Low"
 						onclick={() => (filterPriority = 'low')}
 						active={filterPriority === 'low'}
-						activeClass="bg-gray-500 text-white shadow-md"
-						inactiveClass="bg-gray-100 text-gray-500 shadow-sm hover:-translate-y-0.5 hover:shadow-md"
+						activeClass="bg-purple-accent text-white shadow-md"
+						inactiveClass="bg-purple-accent/10 text-purple-accent shadow-sm hover:-translate-y-0.5 hover:shadow-md"
 					/>
 				</div>
 			</div>

@@ -19,7 +19,7 @@
 		<StatusCard statusTitle="Total Tasks" taskCount={taskStore.tasks.length} />
 		<StatusCard statusTitle="Completed" taskCount={taskStore.completedTasks} status="completed" />
 		<StatusCard
-			statusTitle="Inprogress"
+			statusTitle="In Progress"
 			taskCount={taskStore.inprogressTasks}
 			status="inprogress"
 		/>
