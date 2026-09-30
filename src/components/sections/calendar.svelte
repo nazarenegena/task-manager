@@ -306,11 +306,31 @@
 	{/if}
 
 	<div class="overflow-hidden rounded-xl border border-gray-200">
-		<div class="h-[calc(100vh-360px)] min-h-[440px]">
+		<div class="h-[calc(100vh-360px)] min-h-110">
 			<Calendar
 				{events}
 				view={currentView}
-				views={['day', 'week', 'month']}
+				views={[{
+      id: "day",
+      sections: {
+        timeGrid: {
+          yScale: { startHour:0, endHour: 24 }
+        }
+      }
+    }, {
+        id: "week",
+        sections: {
+          timeGrid: {
+            yScale: {
+              startHour: 0,
+              endHour: 24,
+              step: 60,
+              snapStep: 15,
+              ui: { minUnitHeight: 100 }
+            }
+          }
+        }
+      }, 'month']}
 				date={anchorDate}
 				{cellCss}
 				{eventCss}
