@@ -1,20 +1,17 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
 	import type { viewType } from '../types/viewTypes';
-	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 	import ListTodo from '@lucide/svelte/icons/list-todo';
 	import CalendarCheck2 from '@lucide/svelte/icons/calendar-check-2';
 	import ViewCard from './elements/viewCard.svelte';
-	import Dashboard from './sections/dashboard.svelte';
 	import TaskView from './sections/taskView.svelte';
 	import Calendar from './sections/calendar.svelte';
 	import { fade } from 'svelte/transition';
 
-	let activeView = $state<viewType>('dashboard');
+	let activeView = $state<viewType>('calendar');
 	const views: { id: viewType; label: string; icon: Component<any> }[] = [
-		{ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-		{ id: 'tasks', label: 'Tasks', icon: ListTodo },
-		{ id: 'calendar', label: 'Calendar', icon: CalendarCheck2 }
+		{ id: 'calendar', label: 'Calendar', icon: CalendarCheck2 },
+			{ id: 'tasks', label: 'Tasks', icon: ListTodo }
 	];
 </script>
 
@@ -35,11 +32,7 @@
 		{/each}
 	</div>
 	<div>
-		{#if activeView === 'dashboard'}
-			<div transition:fade={{ duration: 150 }}>
-				<Dashboard />
-			</div>
-		{:else if activeView === 'calendar'}
+		{#if activeView === 'calendar'}
 			<div transition:fade={{ duration: 150 }}>
 				<Calendar />
 			</div>
