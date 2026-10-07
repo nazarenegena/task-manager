@@ -12,7 +12,7 @@ single-scope so it has a clear done-state.
 
 
 ## UX improvements
-- [ ] Change the add/edit task "input" into a modal dialog (instead of the inline form above the calendar)
+- [ ] update: convert the navbar task action to a modal.
 - [ ] Add a "today" pill/marker into the week-view header column (currently the header cell isn't targetable via `cellCss`)
 - [ ] Style the month view "+N more" overflow so it fits the app design
 - [ ] Decide whether partial-time tasks (only start OR only end) should also show a warning/hint in the no-time strip

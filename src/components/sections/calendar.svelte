@@ -1,15 +1,12 @@
 <script lang="ts">
-	import { SvelteDate } from 'svelte/reactivity';
 	import {
 		Calendar,
 		type CalendarEvent,
 		type CalendarInstanceApi,
-		type CellContext,
-		type EventContext
 	} from '@svar-ui/svelte-calendar';
 	import { taskStore } from '$lib/taskStore.svelte';
 	import { priorityColors } from '$lib/priorityColors';
-	import { formatDay, isSameDay } from '$lib/dates';
+	import { formatDay } from '$lib/dates';
 	import TaskForm from '../elements/taskForm.svelte';
 	import CalendarEventContent from '../elements/calendarEventContent.svelte';
 	import CalendarEventPopup from '../elements/calendarEventPopup.svelte';
@@ -18,9 +15,8 @@
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import CircleSlash2 from '@lucide/svelte/icons/circle-slash-2';
-	import Plus from '@lucide/svelte/icons/plus';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
-	import type { priorityType } from '../../types/taskTypes';
+	import { combineTime, navigate, scrollToForm, selectView, cellCss, eventCss, handleAddEvent, handleUpdateEvent, handleDeleteEvent} from '../../utils/helper';
 
 	type EventID = string | number;
 
@@ -32,7 +28,7 @@
 
 	let calendarApi: CalendarInstanceApi | undefined;
 	let anchorDate = $state(new Date());
-	let currentView = $state('week');
+	let currentView = $state('month');
 	let rangeLabel = $state('');
 	let formWrap = $state<HTMLDivElement | null>(null);
 
@@ -52,109 +48,6 @@
 	);
 
 	const noTimeTasks = $derived(taskStore.tasks.filter((task) => !task.startTime || !task.endTime));
-
-	function combineTime(date: Date, time: string, isEnd: boolean): Date {
-		const result = new SvelteDate(date);
-		if (time) {
-			const [hours, minutes] = time.split(':').map(Number);
-			result.setHours(hours, minutes, 0, 0);
-		} else {
-			result.setHours(isEnd ? 23 : 0, isEnd ? 59 : 0, 0, 0);
-		}
-		return result;
-	}
-
-	function timeOf(d: Date, isEnd = false): string {
-		if (!d) return isEnd ? '23:59' : '00:00';
-		const h = String(d.getHours()).padStart(2, '0');
-		const m = String(d.getMinutes()).padStart(2, '0');
-		return `${h}:${m}`;
-	}
-
-	function resolveEvent(
-		id: EventID | undefined,
-		fallback?: Partial<CalendarEvent>
-	): CalendarEvent | undefined {
-		if (id !== undefined && calendarApi) {
-			const ev = calendarApi.getEvent(id);
-			if (ev) return ev;
-		}
-		return fallback as CalendarEvent | undefined;
-	}
-
-	function handleAddEvent(payload: { event?: Partial<CalendarEvent>; id?: EventID }) {
-		const ev = resolveEvent(payload.id, payload.event);
-		if (!ev?.start) return;
-		const title = String(ev.text ?? ev.title ?? 'New task').trim() || 'New task';
-		const allDay = ev.allDay === true;
-		const task = taskStore.addTask(
-			title,
-			'scheduled',
-			(ev.priority as priorityType) || 'medium',
-			(ev.category as string) || '',
-			(ev.description as string) || '',
-			ev.start,
-			allDay ? '' : timeOf(ev.start),
-			allDay ? '' : timeOf(ev.end, true)
-		);
-		taskStore.startEdit(task);
-		scrollToForm();
-	}
-
-	function handleUpdateEvent(payload: { event?: Partial<CalendarEvent>; id?: EventID }) {
-		const ev = resolveEvent(payload.id, payload.event);
-		if (!ev) return;
-		const allDay = ev.allDay === true;
-		taskStore.syncFromCalendar(String(ev.id), {
-			date: ev.start,
-			startTime: allDay ? '' : timeOf(ev.start),
-			endTime: allDay ? '' : timeOf(ev.end, true),
-			title: ev.text ?? ev.title,
-			description: ev.description
-		});
-	}
-
-	function handleDeleteEvent(payload: { id: EventID }) {
-		taskStore.deleteTask(String(payload.id));
-	}
-
-	function cellCss(ctx: CellContext): string {
-		const { date } = ctx;
-		if (!date) return '';
-		const day = date.getDay();
-		const classes: string[] = [];
-		if (day === 0 || day === 6) classes.push('c-weekend');
-		if (isSameDay(date, new Date())) classes.push('c-today');
-		return classes.join(' ');
-	}
-
-	function eventCss(ctx: EventContext): string {
-		const parts = ['ev-cal'];
-		if (ctx.event.status === 'completed') {
-			parts.push('ev-completed');
-		} else {
-			const priority = (ctx.event.priority as priorityType) || '';
-			parts.push(priority ? `ev-${priority}` : 'ev-none');
-		}
-		return parts.join(' ');
-	}
-
-	function navigate(direction: 'previous' | 'now' | 'next') {
-		calendarApi?.exec('navigate-time', { direction });
-	}
-
-	function selectView(view: string) {
-		calendarApi?.exec('navigate-to', { view });
-	}
-
-	function openNewTask() {
-		taskStore.newTask(anchorDate);
-		scrollToForm();
-	}
-
-	function scrollToForm() {
-		requestAnimationFrame(() => formWrap?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-	}
 </script>
 
 <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -172,20 +65,20 @@
 		<div class="ml-auto flex flex-wrap items-center gap-3">
 			<div class="flex items-center gap-1.5">
 				<button
-					onclick={() => navigate('previous')}
+					onclick={() => navigate('previous', calendarApi)}
 					aria-label="Previous"
 					class="cursor-pointer rounded-lg border border-gray-200 bg-white p-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary"
 				>
 					<ChevronLeft class="h-4 w-4" />
 				</button>
 				<button
-					onclick={() => navigate('now')}
+					onclick={() => navigate('now', calendarApi)}
 					class="cursor-pointer rounded-lg border border-gray-200 px-3.5 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary"
 				>
 					Today
 				</button>
 				<button
-					onclick={() => navigate('next')}
+					onclick={() => navigate('next', calendarApi)}
 					aria-label="Next"
 					class="cursor-pointer rounded-lg border border-gray-200 bg-white p-2 text-gray-600 transition-colors hover:bg-gray-50 hover:text-primary"
 				>
@@ -196,7 +89,7 @@
 			<div class="flex items-center rounded-lg bg-primary/5 p-1">
 				{#each viewOptions as view (view?.id)}
 					<button
-						onclick={() => selectView(view?.id)}
+						onclick={() => selectView(view?.id, calendarApi)}
 						class="cursor-pointer rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors {currentView ===
 						view?.id
 							? 'bg-secondary text-primary shadow-sm'
@@ -207,13 +100,13 @@
 				{/each}
 			</div>
 
-			<button
-				onclick={openNewTask}
+			<!-- <button
+				onclick={() => openNewTask(anchorDate, formWrap)}
 				class="flex cursor-pointer items-center gap-1.5 rounded-lg bg-lime-accent px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:shadow-md active:scale-95"
 			>
 				<Plus class="h-4 w-4" />
 				New Task
-			</button>
+			</button> -->
 		</div>
 	</div>
 
@@ -278,7 +171,7 @@
 						<button
 							onclick={() => {
 								taskStore.startEdit(t);
-								scrollToForm();
+								scrollToForm(formWrap);
 							}}
 							class="flex min-w-0 cursor-pointer items-center gap-1.5 text-left"
 						>
@@ -343,12 +236,14 @@
 					api.getReactiveState().currentView.subscribe((v) => (currentView = v));
 					api.getReactiveState().rangeLabel.subscribe((l) => (rangeLabel = l));
 					api.on('add-event', (p) =>
-						handleAddEvent(p as { event?: Partial<CalendarEvent>; id?: EventID })
+						handleAddEvent(p as { event?: Partial<CalendarEvent>; id?: EventID }, calendarApi, formWrap)
 					);
 					api.on('update-event', (p) =>
-						handleUpdateEvent(p as { id: EventID; event?: Partial<CalendarEvent> })
+						handleUpdateEvent(p as { id: EventID; event?: Partial<CalendarEvent> }, calendarApi,)
 					);
-					api.on('delete-event', (p) => handleDeleteEvent(p as { id: EventID }));
+					api.on('delete-event', (p) =>
+						handleDeleteEvent(p as { id: EventID })
+					);
 				}}
 			/>
 		</div>

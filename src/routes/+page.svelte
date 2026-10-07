@@ -1,5 +1,4 @@
 <script>
-	import TaskList from '../components/taskList.svelte';
+	import MainView from "../components/mainView.svelte";
 </script>
-
-<TaskList />
+<MainView/>
