@@ -37,7 +37,7 @@ class TaskStore {
 
 	// ── Form state ──
 	editingId = $state<string | null>(null);
-	openDropdown = $state(false);
+	openModal = $state(false);
 	todo = $state('');
 	todoDescription = $state('');
 	priority = $state<priorityType | ''>('');
@@ -188,7 +188,7 @@ class TaskStore {
 		this.todoDate = toISODate(task.date);
 		this.todoStartTime = task.startTime;
 		this.todoEndTime = task.endTime;
-		this.openDropdown = true;
+		this.openModal = true;
 	};
 
 	// ── Open blank form prefilled with a date (calendar "+ New Task") ──
@@ -196,7 +196,7 @@ class TaskStore {
 		this.editingId = null;
 		this.reset();
 		this.todoDate = toISODate(date ?? new Date());
-		this.openDropdown = true;
+		this.openModal = true;
 	};
 
 	// ── Cancel editing ──
@@ -214,7 +214,7 @@ class TaskStore {
 		this.todoDate = '';
 		this.todoStartTime = '';
 		this.todoEndTime = '';
-		this.openDropdown = false;
+		this.openModal = false;
 	}
 }
 

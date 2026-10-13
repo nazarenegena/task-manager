@@ -1,50 +1,28 @@
 <script lang="ts">
 	import { taskStore } from '$lib/taskStore.svelte';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import { slide } from 'svelte/transition';
+	import { CircleX } from '@lucide/svelte/icons';
 	import Button from './button.svelte';
 </script>
 
-<div
-	class="my-10 flex flex-col justify-between gap-4 rounded-xl border border-primary/15 px-6 py-4 shadow-sm sm:flex-row sm:items-center sm:gap-x-8"
->
+<div class="relative rounded-xl bg-white p-6 shadow-xl">
+	<button
+		type="button"
+		aria-label="Close"
+		onclick={taskStore.cancelEdit}
+		class="absolute top-3 right-3 cursor-pointer rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-500"
+	>
+		<CircleX class="h-6 w-6" />
+	</button>
+
 	<input
 		type="text"
 		bind:value={taskStore.todo}
 		placeholder={taskStore.editingId ? 'Edit task ...' : 'What needs to be done ?'}
-		class="w-full flex-1 rounded-3xl border-none focus:ring-2 focus:ring-lime-accent focus:outline-none"
+		class="w-full rounded-3xl border-none pr-8 focus:ring-2 focus:ring-lime-accent focus:outline-none"
 	/>
-	<div class="flex items-center justify-between gap-4">
-		<ChevronDown
-			class="cursor-pointer transition-transform duration-200 {taskStore.openDropdown
-				? 'rotate-180'
-				: ''}"
-			onclick={() => (taskStore.openDropdown = !taskStore.openDropdown)}
-		/>
-		<div class="flex items-center gap-2">
-			{#if taskStore.editingId}
-				<Button
-					onclick={taskStore.cancelEdit}
-					btnStatus="Cancel"
-					className="bg-gray-200 px-6 py-2 text-gray-800"
-				/>
-			{/if}
 
-			<Button
-				onclick={taskStore.handleAdd}
-				btnStatus={taskStore.editingId ? 'Save' : 'Add'}
-				className="bg-primary px-10 py-2 text-center text-secondary"
-			/>
-		</div>
-	</div>
-</div>
-
-{#if taskStore.openDropdown}
-	<div
-		class="my-6 space-y-8 rounded-xl border border-primary/15 px-6 py-6 shadow-sm"
-		transition:slide={{ duration: 200 }}
-	>
-		<div class="space-y-4">
+	<div class="mt-5 space-y-4">
+		<div class="space-y-2">
 			<p class="text-primary/70">Description</p>
 			<input
 				type="text"
@@ -101,4 +79,19 @@
 			/>
 		</div>
 	</div>
-{/if}
+
+	<div class="mt-6 flex justify-end gap-2">
+		{#if taskStore.editingId}
+			<Button
+				onclick={taskStore.cancelEdit}
+				btnStatus="Cancel"
+				className="bg-gray-200 px-6 py-2 text-gray-800"
+			/>
+		{/if}
+		<Button
+			onclick={taskStore.handleAdd}
+			btnStatus={taskStore.editingId ? 'Save' : 'Add'}
+			className="bg-primary px-10 py-2 text-center text-secondary"
+		/>
+	</div>
+</div>

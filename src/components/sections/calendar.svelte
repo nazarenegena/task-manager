@@ -1,22 +1,28 @@
 <script lang="ts">
-	import {
-		Calendar,
-		type CalendarEvent,
-		type CalendarInstanceApi,
-	} from '@svar-ui/svelte-calendar';
+	import { Calendar, type CalendarEvent, type CalendarInstanceApi } from '@svar-ui/svelte-calendar';
 	import { taskStore } from '$lib/taskStore.svelte';
 	import { priorityColors } from '$lib/priorityColors';
 	import { formatDay } from '$lib/dates';
-	import TaskForm from '../elements/taskForm.svelte';
 	import CalendarEventContent from '../elements/calendarEventContent.svelte';
 	import CalendarEventPopup from '../elements/calendarEventPopup.svelte';
-	import CalendarCheck2 from '@lucide/svelte/icons/calendar-check-2';
-	import Check from '@lucide/svelte/icons/check';
-	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
-	import ChevronRight from '@lucide/svelte/icons/chevron-right';
-	import CircleSlash2 from '@lucide/svelte/icons/circle-slash-2';
-	import Trash2 from '@lucide/svelte/icons/trash-2';
-	import { combineTime, navigate, scrollToForm, selectView, cellCss, eventCss, handleAddEvent, handleUpdateEvent, handleDeleteEvent} from '../../utils/helper';
+	import {
+		Trash2,
+		CircleSlash2,
+		ChevronRight,
+		ChevronLeft,
+		Check,
+		CalendarCheck2
+	} from '@lucide/svelte/icons';
+	import {
+		combineTime,
+		navigate,
+		selectView,
+		cellCss,
+		eventCss,
+		handleAddEvent,
+		handleUpdateEvent,
+		handleDeleteEvent
+	} from '../../utils/helper';
 
 	type EventID = string | number;
 
@@ -30,7 +36,6 @@
 	let anchorDate = $state(new Date());
 	let currentView = $state('month');
 	let rangeLabel = $state('');
-	let formWrap = $state<HTMLDivElement | null>(null);
 
 	const events = $derived(
 		taskStore.tasks
@@ -99,14 +104,6 @@
 					</button>
 				{/each}
 			</div>
-
-			<!-- <button
-				onclick={() => openNewTask(anchorDate, formWrap)}
-				class="flex cursor-pointer items-center gap-1.5 rounded-lg bg-lime-accent px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:shadow-md active:scale-95"
-			>
-				<Plus class="h-4 w-4" />
-				New Task
-			</button> -->
 		</div>
 	</div>
 
@@ -129,12 +126,6 @@
 		</span>
 		<span class="ml-auto hidden text-primary/40 sm:inline">Tip: drag events to reschedule</span>
 	</div>
-
-	{#if taskStore.openDropdown}
-		<div bind:this={formWrap} class="mb-5">
-			<TaskForm />
-		</div>
-	{/if}
 
 	{#if taskStore.tasks.length === 0}
 		<div
@@ -169,10 +160,7 @@
 							{/if}
 						</button>
 						<button
-							onclick={() => {
-								taskStore.startEdit(t);
-								scrollToForm(formWrap);
-							}}
+							onclick={() => taskStore.startEdit(t)}
 							class="flex min-w-0 cursor-pointer items-center gap-1.5 text-left"
 						>
 							<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-gray-400"></span>
@@ -203,27 +191,31 @@
 			<Calendar
 				{events}
 				view={currentView}
-				views={[{
-      id: "day",
-      sections: {
-        timeGrid: {
-          yScale: { startHour:0, endHour: 24 }
-        }
-      }
-    }, {
-        id: "week",
-        sections: {
-          timeGrid: {
-            yScale: {
-              startHour: 0,
-              endHour: 24,
-              step: 60,
-              snapStep: 15,
-              ui: { minUnitHeight: 100 }
-            }
-          }
-        }
-      }, 'month']}
+				views={[
+					{
+						id: 'day',
+						sections: {
+							timeGrid: {
+								yScale: { startHour: 0, endHour: 24 }
+							}
+						}
+					},
+					{
+						id: 'week',
+						sections: {
+							timeGrid: {
+								yScale: {
+									startHour: 0,
+									endHour: 24,
+									step: 60,
+									snapStep: 15,
+									ui: { minUnitHeight: 100 }
+								}
+							}
+						}
+					},
+					'month'
+				]}
 				date={anchorDate}
 				{cellCss}
 				{eventCss}
@@ -236,14 +228,12 @@
 					api.getReactiveState().currentView.subscribe((v) => (currentView = v));
 					api.getReactiveState().rangeLabel.subscribe((l) => (rangeLabel = l));
 					api.on('add-event', (p) =>
-						handleAddEvent(p as { event?: Partial<CalendarEvent>; id?: EventID }, calendarApi, formWrap)
+						handleAddEvent(p as { event?: Partial<CalendarEvent>; id?: EventID }, calendarApi)
 					);
 					api.on('update-event', (p) =>
-						handleUpdateEvent(p as { id: EventID; event?: Partial<CalendarEvent> }, calendarApi,)
+						handleUpdateEvent(p as { id: EventID; event?: Partial<CalendarEvent> }, calendarApi)
 					);
-					api.on('delete-event', (p) =>
-						handleDeleteEvent(p as { id: EventID })
-					);
+					api.on('delete-event', (p) => handleDeleteEvent(p as { id: EventID }));
 				}}
 			/>
 		</div>

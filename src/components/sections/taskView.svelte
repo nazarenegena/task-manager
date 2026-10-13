@@ -5,7 +5,6 @@
 	import ListTodo from '@lucide/svelte/icons/list-todo';
 	import TaskCard from '../elements/taskCard.svelte';
 	import FilterButton from '../elements/filterButton.svelte';
-	import TaskForm from '../elements/taskForm.svelte';
 
 	let filterStatus = $state<'all' | 'completed' | 'inprogress' | 'scheduled'>('all');
 	let filterPriority = $state<'all' | 'high' | 'medium' | 'low'>('all');
@@ -78,7 +77,6 @@
 			priority="high"
 		/>
 	</div>
-	<TaskForm />
 	<div class="my-6 rounded-xl border border-primary/15 p-5 shadow-sm">
 		<div class="mb-4 flex items-center gap-2">
 			<ListFilter class="h-5 w-5 text-primary/60" />

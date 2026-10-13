@@ -1,1 +1,1 @@
-export type viewType = 'tasks' | 'calendar' | 'dashboard';
+export type viewType = 'tasks' | 'calendar';
