@@ -27,7 +27,7 @@
 <div class="flex items-center justify-between">
 	<div class="space-y-1">
 		<h1 class="text-xl font-bold">Task Master</h1>
-		<h3 class="font-semibold text-primary/60">Stay Organized,Track your progress</h3>
+		<h3 class="font-semibold text-primary/60">Stay Organized, Track your progress</h3>
 	</div>
 
 	<button
@@ -65,13 +65,13 @@
 
 {#if taskStore.openModal}
 	<div
-		class="fixed inset-0 z-[1100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
+		class="fixed inset-0 z-1100 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
 		onclick={() => taskStore.cancelEdit()}
 		role="presentation"
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
-			class="max-h-[90vh] w-full max-w-2xl overflow-y-auto"
+			class="h-auto max-w-7xl overflow-y-auto"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"

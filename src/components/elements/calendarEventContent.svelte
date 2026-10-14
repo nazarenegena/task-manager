@@ -29,7 +29,13 @@
 		<span class="truncate text-xs font-medium {done ? 'line-through' : ''}">
 			{event?.text || 'Untitled'}
 		</span>
-		{#if event?.category && mode !== 'grid'}
+		{#if event?.allDay}
+			<span
+				class="hidden shrink-0 rounded bg-primary/5 px-1 text-[10px] font-medium text-primary/50 sm:inline"
+			>
+				All day
+			</span>
+		{:else if event?.category && mode !== 'grid'}
 			<span class="hidden truncate text-[10px] opacity-60 sm:inline">· {event?.category}</span>
 		{/if}
 		{#if done}

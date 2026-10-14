@@ -4,7 +4,7 @@
 	import Button from './button.svelte';
 </script>
 
-<div class="relative rounded-xl bg-white p-6 shadow-xl">
+<div class="relative rounded-xl bg-white p-6 shadow-xl w-full">
 	<button
 		type="button"
 		aria-label="Close"
@@ -14,14 +14,21 @@
 		<CircleX class="h-6 w-6" />
 	</button>
 
-	<input
-		type="text"
-		bind:value={taskStore.todo}
-		placeholder={taskStore.editingId ? 'Edit task ...' : 'What needs to be done ?'}
-		class="w-full rounded-3xl border-none pr-8 focus:ring-2 focus:ring-lime-accent focus:outline-none"
-	/>
 
-	<div class="mt-5 space-y-4">
+
+	<div class="mt-5 space-y-6">
+	<div class="space-y-2">
+
+	<p class="text-primary/70">Add New Task</p>
+
+
+		<input
+			type="text"
+			bind:value={taskStore.todo}
+			placeholder={taskStore.editingId ? 'Edit task ...' : 'What needs to be done ?'}
+				class="h-20 w-full rounded-lg border-primary/15 px-4 py-1 focus:ring-2 focus:ring-lime-accent focus:outline-none"
+		/>
+	</div>
 		<div class="space-y-2">
 			<p class="text-primary/70">Description</p>
 			<input

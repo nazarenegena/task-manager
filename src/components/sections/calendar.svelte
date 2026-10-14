@@ -11,7 +11,8 @@
 		ChevronRight,
 		ChevronLeft,
 		Check,
-		CalendarCheck2
+		CalendarCheck2,
+		Clock
 	} from '@lucide/svelte/icons';
 	import {
 		combineTime,
@@ -38,21 +39,25 @@
 	let rangeLabel = $state('');
 
 	const events = $derived(
-		taskStore.tasks
-			.filter((task) => task.startTime && task.endTime)
-			.map((task) => ({
+		taskStore.tasks.map((task) => {
+			const timed = Boolean(task.startTime && task.endTime);
+			return {
 				id: task.id,
-				start: combineTime(task.date, task.startTime, false),
-				end: combineTime(task.date, task.endTime, true),
+				start: timed
+					? combineTime(task.date, task.startTime, false)
+					: combineTime(task.date, '', false),
+				end: timed ? combineTime(task.date, task.endTime, true) : combineTime(task.date, '', true),
+				allDay: !timed,
 				text: task.title,
 				description: task.description,
 				priority: task.priority,
 				status: task.status,
 				category: task.category
-			}))
+			};
+		})
 	);
 
-	const noTimeTasks = $derived(taskStore.tasks.filter((task) => !task.startTime || !task.endTime));
+	const untimedTasks = $derived(taskStore.tasks.filter((task) => !task.startTime || !task.endTime));
 </script>
 
 <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -135,25 +140,40 @@
 		</div>
 	{/if}
 
-	{#if noTimeTasks.length > 0}
-		<div class="mb-4 rounded-xl border border-dashed border-gray-200 bg-gray-50/60 px-4 py-3">
-			<p class="mb-2 flex items-center gap-1.5 text-xs font-medium text-gray-500">
-				<CircleSlash2 class="h-3.5 w-3.5" />
-				No time
-				<span class="font-normal text-gray-400">· {noTimeTasks.length}</span>
-			</p>
+	{#if untimedTasks.length > 0}
+		<div class="mb-4 rounded-xl border border-lime-accent/40 bg-lime-accent/5 p-4">
+			<div class="mb-3 flex items-start gap-2.5">
+				<div
+					class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-accent/20"
+				>
+					<CircleSlash2 class="h-4 w-4 text-primary/70" />
+				</div>
+				<div class="min-w-0">
+					<p class="flex items-center gap-1.5 text-sm font-semibold text-primary">
+						No time
+						<span
+							class="rounded-full bg-lime-accent/25 px-2 py-0.5 text-[11px] font-medium text-primary"
+						>
+							{untimedTasks.length}
+						</span>
+					</p>
+					<p class="text-xs text-primary/55">
+						Shown as all-day on the calendar. Add a start &amp; end time to schedule them.
+					</p>
+				</div>
+			</div>
 			<div class="flex flex-wrap gap-2">
-				{#each noTimeTasks as t (t.id)}
+				{#each untimedTasks as t (t.id)}
 					{@const done = t.status === 'completed'}
 					<div
-						class="flex items-center gap-2 rounded-md border border-gray-200 bg-white py-1 pr-1.5 pl-2 shadow-sm"
+						class="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white py-1 pr-1 pl-2 shadow-sm"
 					>
 						<button
 							onclick={() => taskStore.updateTaskStatus(t.id, done ? 'scheduled' : 'completed')}
 							aria-label="Toggle done"
 							class="flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded border {done
-								? 'border-gray-300 bg-lime-accent/50'
-								: 'border-gray-300 bg-white'}"
+								? 'border-gray-400 bg-lime-accent/50'
+								: 'border-gray-400 bg-white'}"
 						>
 							{#if done}
 								<Check class="h-3 w-3 text-gray-600" />
@@ -174,9 +194,17 @@
 							<span class="shrink-0 text-[10px] text-gray-400">{formatDay(t.date)}</span>
 						</button>
 						<button
+							onclick={() => taskStore.startEdit(t)}
+							aria-label="Set time"
+							class="flex shrink-0 cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-[10px] font-medium text-primary/60 transition-colors hover:bg-lime-accent/15 hover:text-primary"
+						>
+							<Clock class="h-3 w-3" />
+							<span class="hidden sm:inline">Set time</span>
+						</button>
+						<button
 							onclick={() => taskStore.deleteTask(t.id)}
 							aria-label="Delete task"
-							class="cursor-pointer p-1 text-gray-300 transition-colors hover:text-red-500"
+							class="cursor-pointer p-1 text-gray-500 transition-colors hover:text-red-500"
 						>
 							<Trash2 class="h-3.5 w-3.5" />
 						</button>

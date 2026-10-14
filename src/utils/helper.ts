@@ -95,6 +95,7 @@ export function cellCss(ctx: CellContext): string {
 
 export function eventCss(ctx: EventContext): string {
 	const parts = ['ev-cal'];
+	if (ctx.event.allDay) parts.push('ev-allday');
 	if (ctx.event.status === 'completed') {
 		parts.push('ev-completed');
 	} else {
